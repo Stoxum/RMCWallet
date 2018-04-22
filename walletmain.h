@@ -14,7 +14,7 @@
 #include <QJsonDocument>
 #include <QMenu>
 
-#include <ripple/protocol/PublicKey.h>
+#include <stoxum/protocol/PublicKey.h>
 
 #include "encryption.h"
 #include "errors.h"
@@ -133,7 +133,6 @@ private:
     Error loadWallet();
     Error processWalletEntry(const QJsonObject& poKey, KeyData& pkData);
     Error processWallet(const QJsonObject& poKey);
-    Error convertLegacyWallet(const QJsonObject& poKey);
     void saveKeys(bool pbOverwrite=false);
     Error newKey(QString& psNewAccID);
     Error importKey(const secure::string& psKey, QString& psNewAccID);

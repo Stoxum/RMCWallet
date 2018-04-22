@@ -25,15 +25,16 @@
 #include "format.h"
 #include "iniworker.h"
 
-#include <ripple/protocol/AccountID.h>
-#include <ripple/protocol/PublicKey.h>
-#include <ripple/protocol/digest.h>
-#include <ripple/protocol/HashPrefix.h>
-#include <ripple/protocol/JsonFields.h>
-#include <ripple/protocol/Sign.h>
-#include <ripple/protocol/st.h>
-#include <ripple/protocol/TxFlags.h>
-#include <ripple/basics/StringUtilities.h>
+#include <stoxum/protocol/AccountID.h>
+#include <stoxum/protocol/PublicKey.h>
+#include <stoxum/protocol/SecretKey.h>
+#include <stoxum/protocol/digest.h>
+#include <stoxum/protocol/HashPrefix.h>
+#include <stoxum/protocol/JsonFields.h>
+#include <stoxum/protocol/Sign.h>
+#include <stoxum/protocol/st.h>
+#include <stoxum/protocol/TxFlags.h>
+#include <stoxum/basics/StringUtilities.h>
 
 #include <algorithm>
 #include <random>
@@ -117,7 +118,7 @@ Error WalletMain::processWalletEntry(const QJsonObject& poKey, KeyData& pkData)
             return Error(E_FATAL, "Wallet", "Unable to read private key, it looks like your wallet data was corrupted");
 
         pkData.rsSecretKey = *decodeResult;
-        pkData.rpPublicKey = derivePublicKey(pkData.rsSecretKey);
+        pkData.rpPublicKey = derivePublicKey(KeyType::secp256k1, pkData.rsSecretKey);
         if (pkData.raAccountID != calcAccountID(pkData.rpPublicKey))
             return Error(E_FATAL, "Wallet", "Private key doesn't match your account ID, it looks like your wallet data was corrupted");
 
@@ -164,96 +165,6 @@ Error WalletMain::processWallet(const QJsonObject& poKey)
 
     return eNone;
 }
-
-Error WalletMain::convertLegacyWallet(const QJsonObject& poKey)
-{
-    using namespace ripple;
-
-    if (poKey["account_id"].isUndefined())
-        return Error(E_FATAL, "Conversion", "Senseless wallet record found: no account ID");
-
-    auto decodeResult1 = parseBase58<AccountID>(poKey["account_id"].toString().toStdString());
-    if (! decodeResult1)
-        return Error(E_FATAL, "Conversion", "Unable to decode your account ID, it looks like your wallet data was corrupted.");
-
-    if (poKey["private_key"].isUndefined() && poKey["encrypted_private_key"].isUndefined())
-        return Error(E_FATAL, "Conversion", "Senseless wallet record found: no keys data for account " + poKey["account_id"].toString());
-
-
-    KeyData keyData;
-    keyData.raAccountID = *decodeResult1;
-
-    if (! poKey["encrypted_private_key"].isUndefined())
-    {
-        // Encrypted wallet
-
-        auto decodeResult2 = parseHex<std::vector<unsigned char> >(poKey["salt"].toString().toStdString());
-        if (! decodeResult2)
-            return Error(E_FATAL, "Conversion", "Unable to decode encrypted wallet metadata");
-
-        auto decodeResult3 = parseHex<std::vector<unsigned char> >(poKey["encrypted_private_key"].toString().toStdString());
-        if (! decodeResult3)
-            return Error(E_FATAL, "Conversion", "Unable to decode encrypted key, it looks like your wallet data was corrupted");
-
-        vchDerivationSalt = *decodeResult2;
-        keyData.vchCryptedKey = *decodeResult3;
-
-        nDeriveIterations = poKey["iterations"].toInt();
-        if (nDeriveIterations == 0) nDeriveIterations = 500000;
-
-        secure::string strPassword;
-
-        while (true)
-        {
-            EnterPassword pwDialog(this);
-            if (pwDialog.exec() != QDialog::Accepted)
-                return eNoPassword; // User refused to enter the password
-            bool fOk = true;
-            strPassword = pwDialog.getPassword();
-            if (fOk) fOk = legacyDecryptKey(keyData.vchCryptedKey, strPassword, vchDerivationSalt, nDeriveIterations, keyData.rsSecretKey);
-            if (fOk) break;
-            continue; // Wrong password, try again
-        }
-
-        keyData.rpPublicKey = derivePublicKey(keyData.rsSecretKey);
-        if (keyData.raAccountID != calcAccountID(keyData.rpPublicKey))
-            return Error(E_FATAL, "Conversion", "Private key doesn't match your account ID, it looks like your wallet data was corrupted");
-
-        secure::string rsaPrivKey;
-        if (! generateRSAKeys(rsaPrivKey, sMasterPubKey))
-            return Error(E_FATAL, "Conversion", "Unable to generate RSA key pair");
-
-        if (! encryptRSAKey(rsaPrivKey, strPassword, vchDerivationSalt, nDeriveIterations, vchCryptedMasterKey))
-            return Error(E_FATAL, "Conversion", "Error while encrypting RSA private key");
-
-        if (! encryptSecretKey(keyData.rsSecretKey, sMasterPubKey, keyData.vchCryptedKey))
-            return Error(E_FATAL, "Conversion", "Error while encrypting your wallet");
-        keyData.rsSecretKey.~SecretKey(); // Destroy secret key object
-    }
-    else
-    {
-        // Plain wallet
-        auto decodeResult = parseHex<SecretKey>(poKey["private_key"].toString().toStdString());
-        if (! decodeResult)
-            return Error(E_FATAL, "Conversion", "Unable to read private key, it looks like your wallet data was corrupted");
-        keyData.rsSecretKey = *decodeResult;
-        keyData.rpPublicKey = derivePublicKey(keyData.rsSecretKey);
-        if (keyData.raAccountID != calcAccountID(keyData.rpPublicKey))
-            return Error(E_FATAL, "Conversion", "Private key doesn't match your account ID, it looks like your wallet data was corrupted");
-    }
-
-    vkStore.push_back(keyData);
-    vsAccounts.push_back(toBase58(keyData.raAccountID).c_str());
-    vnBalances.push_back(0);
-    vnSequences.push_back(0);
-    vtTransactions.push_back(TxVector());
-    nMainAccount = 0;
-
-    saveKeys();
-
-    return eNone;
-}
-
 
 Error WalletMain::loadWallet()
 {
@@ -310,17 +221,9 @@ Error WalletMain::loadWallet()
 
         }
 
-        if (keyObj["main_account"].isDouble())
-        {
-            // Multi wallet mode
-            nMainAccount = keyObj["main_account"].toDouble();
-            return processWallet(keyObj);
-        }
-        else
-        {
-            // Convert single wallets
-            return convertLegacyWallet(keyObj);
-        }
+        // Multi wallet mode
+        nMainAccount = keyObj["main_account"].toDouble();
+        return processWallet(keyObj);
     }
 
     return Error(E_FATAL, "Wallet", "Shouldn't happen in real life");
@@ -386,7 +289,7 @@ Error WalletMain::newKey(QString& psNewAccID)
 {
     using namespace ripple;
     KeyData keyData;
-    std::tie(keyData.rpPublicKey, keyData.rsSecretKey) = randomKeyPair();
+    std::tie(keyData.rpPublicKey, keyData.rsSecretKey) = randomKeyPair(KeyType::secp256k1);
     keyData.raAccountID = calcAccountID(keyData.rpPublicKey);
 
     if (nDeriveIterations != 0)
@@ -416,12 +319,12 @@ Error WalletMain::newKey(QString& psNewAccID)
 Error WalletMain::importKey(const secure::string& psKey, QString& psNewAccID)
 {
     using namespace ripple;
-    auto decodeResult = parseBase58<SecretKey>(TOKEN_ACCOUNT_WIF, psKey.c_str());
+    auto decodeResult = parseBase58<SecretKey>(TokenType::AccountSecret, psKey.c_str());
     if (! decodeResult)
         return eNoWif; // Incorrect WIF string
     KeyData keyData;
     keyData.rsSecretKey = *decodeResult;
-    keyData.rpPublicKey = derivePublicKey(keyData.rsSecretKey);
+    keyData.rpPublicKey = derivePublicKey(KeyType::secp256k1, keyData.rsSecretKey);
     keyData.raAccountID = calcAccountID(keyData.rpPublicKey);
     psNewAccID = toBase58(keyData.raAccountID).c_str();
 
@@ -456,7 +359,7 @@ Error WalletMain::exportKey(QString& psKey)
     using namespace ripple;
     auto eRes = askPassword();
     if (eNone == eRes)
-        psKey = toWIF(vkStore[nMainAccount].rsSecretKey).c_str();
+        psKey = toBase58(TokenType::AccountSecret, vkStore[nMainAccount].rsSecretKey).c_str();
     return eRes;
 }
 

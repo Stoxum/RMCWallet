@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <openssl/crypto.h>
-#include <ripple/protocol/SecretKey.h>
+#include <stoxum/protocol/SecretKey.h>
 
 #include "secure.h"
 

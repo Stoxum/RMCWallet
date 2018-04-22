@@ -1,4 +1,4 @@
-# RMCWallet
+# StoxumWallet
 Lightweight wallet for RMC with Qt based interface 
 
 ## Build instructions
@@ -9,10 +9,10 @@ Lightweight wallet for RMC with Qt based interface
 2. Download 32 or 64 bit dependency archive and unpack it either to C:\MyProjects32\ or C:\MyProjects\ respectively.
 3. Run qmake_env_static.cmd and use opened command prompt for the next actions.
 3. Clone this repository:
-    git clone http://github.com/RussianMiningCoin/RMCWallet
+    git clone http://github.com/Stoxum/StoxumWallet
 4. Run the following commands:
 ```
-    cd RMCWallet
+    cd StoxumWallet
     mkdir build
     cd build && qmake ..
     nmake
@@ -26,17 +26,17 @@ Lightweight wallet for RMC with Qt based interface
     brew install boost openssl cmake protobuf scons
 4. Clone and build ripple-libpp:
 ```
-    git clone https://github.com/RussianMiningCoin/rmc-libpp
-    cd rmc-libpp && git update submodule --init --recursive
+    git clone https://github.com/Stoxum/stoxum-libpp
+    cd stoxum-libpp && git submodule update --init --recursive
     mkdir build && cd build
     cmake .. && make
     cd ../..
 ```
-5. Clone this repository and open RMCWallet.pro in Qt Creator.
-6. You should be able to build your project as usual. If it doesn't work then ensure that rmc-libpp tree is sharing parent directory with RMCWallet project.
+5. Clone this repository and open StoxumWallet.pro in Qt Creator.
+6. You should be able to build your project as usual. If it doesn't work then ensure that stoxum-libpp tree is sharing parent directory with StoxumWallet project.
 
 ### Other NIXes
-Should be similar to OS X steps. You may also need to build boost 1.66 though. Please consider reading rmc-libpp build instructions first.
+Should be similar to OS X steps. You may also need to build boost 1.66 though. Please consider reading stoxum-libpp build instructions first.
 
 ## Build dependencies
 

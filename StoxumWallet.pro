@@ -8,7 +8,7 @@ QT       += core gui websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = RMCWallet
+TARGET = StoxumWallet
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -42,9 +42,9 @@ unix {
         OPENSSL_LIB_PATH = /usr/local/Cellar/openssl/1.0.2n/lib
     }
 
-    INCLUDEPATH += ../rmc-libpp/extras/rmcd/src
+    INCLUDEPATH += ../stoxum-libpp/extras/stoxumd/src
     INCLUDEPATH += $$BOOST_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH
-    LIBS += -L../rmc-libpp/build/src/unity -lrmclibpp
+    LIBS += -L../stoxum-libpp/build/src/unity -lstoxumlibpp
     LIBS += $$join(OPENSSL_LIB_PATH,,-L,) -lssl -lcrypto
     LIBS += $$join(BOOST_LIB_PATH,,-L,) \
             \
@@ -67,12 +67,12 @@ unix {
 
 win32 {
     contains(QT_ARCH, i386) {
-        INCLUDEPATH += C:\MyProjects32\deps\rmclibpp-static\include
+        INCLUDEPATH += C:\MyProjects32\deps\stoxumlibpp-static\include
 
         INCLUDEPATH += C:\MyProjects32\deps\openssl-static\include
         INCLUDEPATH += C:\MyProjects32\deps\boost-static\include
 
-        LIBS += -LC:\MyProjects32\deps\rmclibpp-static\lib -lrmclibpp
+        LIBS += -LC:\MyProjects32\deps\stoxumlibpp-static\lib -lstoxumlibpp
         LIBS += -LC:\MyProjects32\deps\openssl-static\lib -llibeay32 -lssleay32 -llegacy_stdio_definitions -ladvapi32 -lgdi32
         LIBS += -LC:\MyProjects32\deps\boost-static\lib \
                 \
@@ -87,12 +87,12 @@ win32 {
                 -llibboost_thread-vc141-mt-s-x32-1_66 \
                 -llibboost_serialization-vc141-mt-s-x32-1_66
     } else {
-        INCLUDEPATH += C:\MyProjects\deps\rmclibpp-static\include
+        INCLUDEPATH += C:\MyProjects\deps\stoxumlibpp-static\include
 
         INCLUDEPATH += C:\MyProjects\deps\openssl-static\include
         INCLUDEPATH += C:\MyProjects\deps\boost-static\include
 
-        LIBS += -LC:\MyProjects\deps\rmclibpp-static\lib -lrmclibpp
+        LIBS += -LC:\MyProjects\deps\stoxumlibpp-static\lib -lstoxumlibpp
         LIBS += -LC:\MyProjects\deps\openssl-static\lib -llibeay32 -lssleay32 -llegacy_stdio_definitions -ladvapi32 -lgdi32
         LIBS += -LC:\MyProjects\deps\boost-static\lib \
                 \
@@ -152,8 +152,8 @@ FORMS += walletmain.ui \
     switchaccount.ui \
     proxysettings.ui
 
-macx:ICON = RMC.icns
-win32:RC_ICONS += RMC.ico
+macx:ICON = stoxum.icns
+win32:RC_ICONS += stoxum.ico
 
 RESOURCES += \
     resources.qrc

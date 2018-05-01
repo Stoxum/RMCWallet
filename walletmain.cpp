@@ -113,7 +113,7 @@ Error WalletMain::processWalletEntry(const QJsonObject& poKey, KeyData& pkData)
     if ( !poKey["private_key"].isUndefined() && !poKey["private_key"].isNull())
     {
         // Plain wallet
-        auto decodeResult = parseHex<SecretKey>(poKey["private_key"].toString().toStdString());
+        auto decodeResult = parseBase58<SecretKey>(TokenType::AccountSecret, poKey["private_key"].toString().toStdString());
         if (! decodeResult)
             return Error(E_FATAL, "Wallet", "Unable to read private key, it looks like your wallet data was corrupted");
 
@@ -127,16 +127,17 @@ Error WalletMain::processWalletEntry(const QJsonObject& poKey, KeyData& pkData)
     else
     {
         // Encrypted wallet
-        auto decodeResult2 = parseHex<std::vector<unsigned char> >(poKey["encrypted_private_key"].toString().toStdString());
-        auto decodeResult4 = parseHex<std::vector<unsigned char> >(poKey["public_key"].toString().toStdString());
+        // TODO: finish it
+        // auto decodeResult2 = parseHex<std::vector<unsigned char> >(poKey["encrypted_private_key"].toString().toStdString());
+        // auto decodeResult4 = parseHex<std::vector<unsigned char> >(poKey["public_key"].toString().toStdString());
 
-        if (! decodeResult2 || ! decodeResult4)
-            return Error(E_FATAL, "Wallet", "Unable to decode encrypted key, it looks like your wallet data was corrupted");
+        // if (! decodeResult2 || ! decodeResult4)
+        //     return Error(E_FATAL, "Wallet", "Unable to decode encrypted key, it looks like your wallet data was corrupted");
 
-        pkData.vchCryptedKey = *decodeResult2;
-        pkData.rpPublicKey = PublicKey(makeSlice(*decodeResult4));
+        // pkData.vchCryptedKey = *decodeResult2;
+        // pkData.rpPublicKey = PublicKey(makeSlice(*decodeResult4));
 
-        return eNone;
+        // return eNone;
     }
 }
 
@@ -208,21 +209,26 @@ Error WalletMain::loadWallet()
         if (keyObj["encryption"].isObject())
         {
             // Encrypted wallet
-            auto decodeResult1 = parseHex<std::vector<unsigned char> >(keyObj["encryption"].toObject()["salt"].toString().toStdString());
-            auto decodeResult2 = parseHex<std::vector<unsigned char> >(keyObj["encryption"].toObject()["encrypted_master_private_key"].toString().toStdString());
-            if (! decodeResult1 || ! decodeResult2)
-                return Error(E_FATAL, "Wallet", "Unable to decode encrypted wallet metadata");
+            // auto decodeResult1 = parseHex<std::vector<unsigned char> >(keyObj["encryption"].toObject()["salt"].toString().toStdString());
+            // auto decodeResult2 = parseHex<std::vector<unsigned char> >(keyObj["encryption"].toObject()["encrypted_master_private_key"].toString().toStdString());
+            // if (! decodeResult1 || ! decodeResult2)
+            //     return Error(E_FATAL, "Wallet", "Unable to decode encrypted wallet metadata");
 
-            vchDerivationSalt = *decodeResult1;
-            vchCryptedMasterKey = *decodeResult2;
-            sMasterPubKey = keyObj["encryption"].toObject()["master_public_key"].toString().toStdString();
-            nDeriveIterations = keyObj["encryption"].toObject()["iterations"].toInt();
-            if (nDeriveIterations == 0) nDeriveIterations = 500000;
+            // vchDerivationSalt = *decodeResult1;
+            // vchCryptedMasterKey = *decodeResult2;
+            // sMasterPubKey = keyObj["encryption"].toObject()["master_public_key"].toString().toStdString();
+            // nDeriveIterations = keyObj["encryption"].toObject()["iterations"].toInt();
+            // if (nDeriveIterations == 0) nDeriveIterations = 500000;
 
         }
 
         // Multi wallet mode
-        nMainAccount = keyObj["main_account"].toDouble();
+        if (keyObj["main_account"].isDouble())
+        {
+            // Multi wallet mode
+            nMainAccount = keyObj["main_account"].toDouble();
+            return processWallet(keyObj);
+        }
         return processWallet(keyObj);
     }
 
@@ -244,7 +250,7 @@ void WalletMain::saveKeys(bool pbOverwrite)
             keyObj["public_key"] = strHex(keyData.rpPublicKey.data(), keyData.rpPublicKey.size()).c_str();
         }
         else
-            keyObj["private_key"] = strHex(keyData.rsSecretKey.data(), 32).c_str();
+            keyObj["private_key"] = toBase58(TokenType::AccountSecret, keyData.rsSecretKey).c_str();
 
         keysArr.push_back(keyObj);
     }
@@ -535,7 +541,7 @@ void WalletMain::socketConnect()
     using namespace std;
 
     // Connect to random RPC server
-    vector<QString> servers = {"wss://connor.rmc.one:443/", "wss://kirk.rmc.one:443/", "wss://forrest.rmc.one:443/", "wss://archer.rmc.one:443/", "wss://lorca.rmc.one:443/"};
+    vector<QString> servers = {"wss://s1.stoxum.com:443/"};
     random_device random_device;
     mt19937 engine{random_device()};
     uniform_int_distribution<int> dist(0, servers.size() - 1);

@@ -38,8 +38,8 @@ unix {
         BOOST_LIB_PATH = /usr/local/Cellar/boost/1.66.0/lib
         BOOST_SUFFIX=-mt
 
-        OPENSSL_INCLUDE_PATH += /usr/local/Cellar/openssl/1.0.2n/include
-        OPENSSL_LIB_PATH = /usr/local/Cellar/openssl/1.0.2n/lib
+        OPENSSL_INCLUDE_PATH += /usr/local/Cellar/openssl/1.0.2o_1/include
+        OPENSSL_LIB_PATH = /usr/local/Cellar/openssl/1.0.2o_1/lib
     }
 
     INCLUDEPATH += ../stoxum-libpp/extras/stoxumd/src

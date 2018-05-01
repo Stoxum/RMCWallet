@@ -172,7 +172,7 @@ Error WalletMain::loadWallet()
     using namespace ripple;
 
     QFile keyFile;
-    keyFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + QDir::separator() + "keyStore.json");
+    keyFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + QDir::separator() + ".STMStore.json");
     bool fOpened = keyFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
     if (!fOpened)
@@ -275,7 +275,7 @@ void WalletMain::saveKeys(bool pbOverwrite)
     auto walletDoc = QJsonDocument (walletObj).toJson();
 
     QFile keyFile;
-    keyFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + QDir::separator() + "keyStore.json");
+    keyFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + QDir::separator() + ".STMStore.json");
 
     if (pbOverwrite)
     {

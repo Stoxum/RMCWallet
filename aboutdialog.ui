@@ -40,7 +40,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="resources.qrc">:/RMC_Logo_all1.png</pixmap>
+      <pixmap resource="resources.qrc">:/stoxum-logo.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>false</bool>
@@ -110,9 +110,9 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QLabel" name="rmcUrl">
+    <widget class="QLabel" name="stmUrl">
      <property name="text">
-      <string>&lt;a href=&quot;https://rmc.one/&quot;&gt;https://rmc.one&lt;/a&gt;</string>
+      <string>&lt;a href=&quot;https://stoxum.com/&quot;&gt;https://stoxum.com&lt;/a&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -132,7 +132,7 @@
    <item row="0" column="3">
     <widget class="QLabel" name="versionLabel">
      <property name="text">
-      <string>RMC GUI Application 
+      <string>STM GUI Application 
 Version 0.0.4</string>
      </property>
     </widget>

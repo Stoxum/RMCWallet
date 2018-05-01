@@ -1,5 +1,5 @@
 # StoxumWallet
-Lightweight wallet for RMC with Qt based interface 
+Lightweight wallet for STM with Qt based interface 
 
 ## Build instructions
 

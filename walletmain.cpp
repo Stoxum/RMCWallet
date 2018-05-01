@@ -468,7 +468,7 @@ void WalletMain::setOnline(bool pbFlag, const QString& psReason)
     using namespace ripple;
 
     QString strAccountID = toBase58(vkStore[nMainAccount].raAccountID).c_str();
-    this->setWindowTitle(QString("RMC Wallet [%1%2]").arg(strAccountID).arg(pbFlag ? "" : ", offline"));
+    this->setWindowTitle(QString("STM Wallet [%1%2]").arg(strAccountID).arg(pbFlag ? "" : ", offline"));
 
     // Select default tab
     if (! pbFlag) ui->tabWidget->setCurrentIndex(0);
@@ -825,9 +825,9 @@ void WalletMain::submitResponse(const QJsonObject& poResp)
     QJsonObject result = poResp["result"].toObject();
 
     if (result["status"] == "error")
-        Show("Transaction error", QString("Failure while committing transaction to the RMC network: ") + poResp["error_message"].toString(), E_WARN);
+        Show("Transaction error", QString("Failure while committing transaction to the STM network: ") + poResp["error_message"].toString(), E_WARN);
     else if (result["engine_result"].toString() != "tesSUCCESS")
-        Show("Transaction error", QString("Error while processing transaction by the RMC network: ") + result["engine_result_message"].toString(), E_WARN);
+        Show("Transaction error", QString("Error while processing transaction by the STM network: ") + result["engine_result_message"].toString(), E_WARN);
     else
         Show("Transaction applied", result["engine_result_message"].toString(), E_INFO);
 }
@@ -933,7 +933,7 @@ void WalletMain::sendPayment(bool pbJustAsk)
         if (pbJustAsk)
         {
             QString strConf = "I'm about to send " + ui->amountToSend->text()
-                    + " RMC to " + ui->receiverAddressEdit->text() + ". Do you agree?";
+                    + " STM to " + ui->receiverAddressEdit->text() + ". Do you agree?";
 
             nExpected = QMessageBox::Yes;
             qActionDlg = new QMessageBox(QMessageBox::Information, "Confirmation", strConf, QMessageBox::Yes | QMessageBox::No);
@@ -1129,7 +1129,7 @@ void WalletMain::on_actionSwitch_account_triggered()
     }
 }
 
-CIniworker RMCSettings;
+CIniworker STMSettings;
 
 void WalletMain::on_actionProxy_triggered()
 {
@@ -1137,7 +1137,7 @@ void WalletMain::on_actionProxy_triggered()
     if (proxysettings.exec() == QDialog::Accepted)
     {
         proxysettings.updateProxy();
-        RMCSettings.Write(CIniworker::W_PROXY);
+        STMSettings.Write(CIniworker::W_PROXY);
         doReconnect();
     };
 }
@@ -1146,7 +1146,7 @@ void WalletMain::on_actionProxy_triggered()
 
 int main(int argc, char *argv[])
 {
-    RMCSettings.Read(CIniworker::R_PROXY);
+    STMSettings.Read(CIniworker::R_PROXY);
 
     QApplication a(argc, argv);
     WalletMain w;

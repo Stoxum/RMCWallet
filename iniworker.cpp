@@ -9,7 +9,7 @@
 
 CIniworker::CIniworker()
 {
-    iniFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + QDir::separator() + "RMCSettings.json");
+    iniFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + QDir::separator() + "STMSettings.json");
     iniFile.open(QIODevice::ReadWrite | QIODevice::Text);
     if (iniFile.size() == 0)
     {

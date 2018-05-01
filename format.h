@@ -14,7 +14,7 @@ inline static QString timeFormat(int64_t nTime)
     return QDateTime::fromTime_t(946684800 + nTime).toString("dd/MM/yyyy hh:mm:ss");
 }
 
-inline static QString AmountWithSign(int64_t nAmount, bool isDebit = false, QString strCurrency = "RMC")
+inline static QString AmountWithSign(int64_t nAmount, bool isDebit = false, QString strCurrency = "STM")
 {
     return QString("%1%2 %3").arg(isDebit ? "-" : "").arg(QString::number ( nAmount / coinAsDouble, 'f', 6 )).arg(strCurrency);
 }

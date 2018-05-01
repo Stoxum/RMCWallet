@@ -541,7 +541,7 @@ void WalletMain::socketConnect()
     using namespace std;
 
     // Connect to random RPC server
-    vector<QString> servers = {"wss://s1.stoxum.com:443/"};
+    vector<QString> servers = {"wss://s1.stoxum.com:51231/", "wss://s2.stoxum.com:51231/", "wss://s3.stoxum.com:51231/"};
     random_device random_device;
     mt19937 engine{random_device()};
     uniform_int_distribution<int> dist(0, servers.size() - 1);
